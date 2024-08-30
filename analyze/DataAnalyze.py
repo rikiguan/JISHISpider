@@ -3,8 +3,16 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 from utils.databaseES import es
+import matplotlib.font_manager as fm
 
-rcParams['font.sans-serif'] = ['SimHei']  # 使用黑体作为中文字体
+# 字体文件路径
+font_path = 'fonts/SourceHanSansCN-Normal.ttf'
+
+# 添加字体到字体管理器
+prop = fm.FontProperties(fname=font_path)
+
+# 设置 Matplotlib 使用自定义字体
+rcParams['font.family'] = prop.get_name()
 index_name = "school_new"
 
 

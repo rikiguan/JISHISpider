@@ -1,4 +1,3 @@
-#!/usr/bin/env python3.8
 import json
 import logging
 import time
@@ -74,8 +73,8 @@ def callback_event_handler():
     return event_handler(event)
 
 def setupFeishu():
-    app.run(host="0.0.0.0", port=3000, debug=True,threaded=True,use_reloader=False)
+    app.run(host="0.0.0.0", port=3000, debug=False,threaded=True,use_reloader=False)
 
 if __name__ == "__main__":
     # init()
-    app.run(host="0.0.0.0", port=3000, debug=True)
+    app.run(host="0.0.0.0", port=3000, debug=False)

@@ -1,0 +1,8 @@
+services:
+  spiderpy:
+    image: jishispider:v20240830.3
+    ports:
+      - "3000:3000"
+    volumes:
+      - /c/Users/Fang/Desktop/data/data:/opt/jishi/data
+      - /c/Users/Fang/Desktop/data/log:/opt/jishi/log

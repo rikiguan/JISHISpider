@@ -1,7 +1,9 @@
 from elasticsearch import Elasticsearch
 
 # 创建 Elasticsearch 客户端
-es = Elasticsearch("http://localhost:9200")
+# es = Elasticsearch("http://localhost:9200")
+# es = Elasticsearch("http://my-es:9200")
+es = Elasticsearch(["http://192.168.1.10:9200"])
 my_index="school_new"
 # 查询最近的十条数据
 response = es.search(

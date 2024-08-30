@@ -2,7 +2,7 @@ from elasticsearch import Elasticsearch, NotFoundError
 from utils.logger import logger, printlog, genTextColor
 
 index_name = "school_new"
-es = Elasticsearch("http://localhost:9200")
+es = Elasticsearch("http://192.168.1.10:9200")
 
 def addToDatabaseFromList(tag,list):
     for doc in list:

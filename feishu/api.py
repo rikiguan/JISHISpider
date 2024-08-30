@@ -1,11 +1,9 @@
-#! /usr/bin/env python3.8
 import json
 import os
 import logging
 import requests
 from requests_toolbelt import MultipartEncoder
-from conf import *
-from utils.logger import logger
+
 
 
 # const

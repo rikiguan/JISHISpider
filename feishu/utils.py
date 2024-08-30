@@ -1,4 +1,3 @@
-#!/usr/bin/env python3.8
 class Obj(dict):
     def __init__(self, d):
         for a, b in d.items():

@@ -1,7 +1,7 @@
 import json
 import threading
 import JiShiRequest
-from analyze.Summary import dailyReportToAll, dailyReportToOne
+from analyze.Summary import  dailyReportToOne
 from conf import *
 from utils.useLog import log_thread
 import time

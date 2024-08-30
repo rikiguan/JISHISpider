@@ -1,0 +1,7 @@
+elasticsearch
+Flask
+matplotlib
+pycryptodome
+Requests
+requests_toolbelt
+Flask

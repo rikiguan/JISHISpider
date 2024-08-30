@@ -1,4 +1,3 @@
-from conf import *
 from feishu.server import message_api_client
 from datetime import datetime
 
