@@ -1,8 +1,5 @@
 import json
 import threading
-
-from sqlalchemy import false
-
 from utils import waitTimeManager
 from utils.TaskManager import task_manager
 import JiShiRequest

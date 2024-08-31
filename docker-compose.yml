@@ -1,8 +1,55 @@
+version: "3.0"
 services:
-  spiderpy:
-    image: jishispider:v20240830.3
-    ports:
-      - "3000:3000"
+  elasticsearch:
+    container_name: my-es
+    image: registry.cn-hangzhou.aliyuncs.com/rikiguan/elasticsearchwithik:7.14.2
+    environment:
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "network.host=127.0.0.1"
     volumes:
-      - /c/Users/Fang/Desktop/data/data:/opt/jishi/data
-      - /c/Users/Fang/Desktop/data/log:/opt/jishi/log
+      - /root/data/docker/elasticsearch:/usr/share/elasticsearch/data
+    restart: always
+    networks:
+      - net1
+    ports:
+      - 9200:9200
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  kibana:
+    container_name: kb-container
+    image: docker.elastic.co/kibana/kibana:7.14.2
+    restart: always
+    environment:
+      - ELASTICSEARCH_HOSTS=http://my-es:9200
+      - I18N_LOCALE="zh-CN"
+    networks:
+      - net1
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
+
+  spiderpy:
+    container_name: jishispider
+    image: registry.cn-hangzhou.aliyuncs.com/rikiguan/jishispider:20240831.1
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    networks:
+      - net1
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    volumes:
+      - /root/data/docker/jishi/data:/opt/jishi/data
+      - /root/data/docker/jishi/log:/opt/jishi/log
+
+networks:
+  net1:
+    external: true
