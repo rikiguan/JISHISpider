@@ -23,7 +23,7 @@ class MessageApiClient(object):
         return self._tenant_access_token
 
     def send_text_with_open_id(self, open_id, content):
-        self.send("open_id", open_id, "text", content)
+        self.send("open_id", open_id, "text", json.dumps({'text': content}))
 
     def send_img_with_open_id(self, open_id, path):
         content = {
@@ -55,6 +55,7 @@ class MessageApiClient(object):
         self.send("open_id", open_id, "system", json.dumps(content))
 
     def upload_file(self, file_path):
+        self._authorize_tenant_access_token()
         url = "https://open.feishu.cn/open-apis/im/v1/files"
         form = {'file_type': 'stream',
                 'file_name': os.path.basename(file_path),
@@ -73,6 +74,7 @@ class MessageApiClient(object):
             return Exception("Call Api Error, errorCode is %s" % content["code"])
 
     def upload_image(self, image_path):
+        self._authorize_tenant_access_token()
         with open(image_path, 'rb') as f:
             image = f.read()
             resp = requests.post(
@@ -111,6 +113,7 @@ class MessageApiClient(object):
             "content": content,
             "msg_type": msg_type,
         }
+        print(req_body)
         resp = requests.post(url=url, headers=headers, json=req_body)
         MessageApiClient._check_error_response(resp)
 

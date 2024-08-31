@@ -3,8 +3,9 @@ import logging
 import time
 import uuid
 import requests
+
+from utils.TaskManager import Task
 from utils.logger import logger
-from utils.QueueModule import  Task
 from feishu.api import MessageApiClient
 from feishu.event import MessageReceiveEvent, UrlVerificationEvent, EventManager
 from flask import Flask, jsonify, g, request
@@ -77,4 +78,4 @@ def setupFeishu():
 
 if __name__ == "__main__":
     # init()
-    app.run(host="0.0.0.0", port=3000, debug=False)
+    pass

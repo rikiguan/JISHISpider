@@ -25,6 +25,11 @@ def getLastPostFromES():
             "sort": [{"p_time": {"order": "desc"}}]
         }
     )
-    logger.info(f"最新记录{response['hits']['hits'][0]['_id']}时间戳{response['hits']['hits'][0]['_source']['p_time']}")
-    return response['hits']['hits'][0]
+    if response['hits']['hits']:
+        last_post = response['hits']['hits'][0]
+        logger.info(f"最新记录{last_post['_id']}时间戳{last_post['_source']['p_time']}")
+        return last_post
+    else:
+        logger.info("未找到任何记录")
+        return None
 

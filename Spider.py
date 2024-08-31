@@ -1,98 +1,56 @@
 import json
 import threading
+
+from sqlalchemy import false
+
+from utils import waitTimeManager
+from utils.TaskManager import task_manager
 import JiShiRequest
-from analyze.Summary import  dailyReportToOne
+import utils.waitTimeManager
 from conf import *
+from tasks.feishuPushTask import FeishuPushThread
 from utils.useLog import log_thread
 import time
 from feishu import server
 from tasks import timingTask
 from utils.QueueModule import msgpq,pq
-from utils.QueueModule import  Task
+from utils.TaskManager import Task, TaskManager
 from utils.databaseES import es, getLastPostFromES, addToDatabaseFromList
 from utils.logger import logger
 
+import tasks #important
 
 
-
-
-def NewPostProducer():
-    while True:
-        res = getLastPostFromES()
-        pq.put(Task(2, "newPost", {'from_id': res['_id'], 'from_time': res['_source']['p_time']}))
-        time.sleep(30*60)
-
-
-def handleNewPostTask(rq, tk, tag):
-    response = rq.requestGetNewPostNum(tk.data['from_id'], tk.data['from_time'])
-    if response.status_code != 200:
-        return False
-
-    data = json.loads(response.text)
-    if data['errno'] != 0:
-        return False
-
-    num = data['data']['count']
-    if(num ==0 ):
-        return True
-
-    response1 = rq.requestGetNewPost(tk.data['from_id'], tk.data['from_time'])
-    if response1.status_code != 200:
-        return False
-
-    data1 = json.loads(response1.text)
-    if data1['errno'] != 0 or len(data1['data']['list']) == 0:
-        return False
-
-    list1 = data1['data']['list']
-    addToDatabaseFromList(tag, list1)
-    if (int(num) == len(list1)):
-        return True
-    timestamp = list1[-1]['p_time']
-    getnum = len(list1)
-
-    while getnum < 2 * int(num) and int(timestamp) > int(tk.data['from_time']):
-        response2 = rq.requestMainPageFromTime(timestamp)
-        if response2.status_code != 200:
-            return False
-        data2 = json.loads(response2.text)
-        if data2['errno'] != 0 or len(data2['data']['list']) == 0:
-            return False
-        list2 = data2['data']['list']
-        addToDatabaseFromList(tag, list2)
-        timestamp = list2[-1]['p_time']
-        getnum += len(list2)
-        time.sleep(5)
-    return True
 
 @log_thread()
 def taskHandler(tag,rq,tk):
-    if tk.task_type == 'newPost':
-        return handleNewPostTask(rq, tk, tag)
-    elif tk.task_type == 'type2':
-        pass
-    return False
+    handler = task_manager.get_handler_with_task(tk)
+    return handler(rq, tk, tag)
+
 
 def SpiderThread(token):
-    tag = token[:5]
+    failNum = 0
+    tag = token[0][:5]
     rq = JiShiRequest.JiShi(token)
-    while True:
+    while failNum < 10:
         tk = pq.get()
         logger.info(f'任务获取{tk}')
         if not taskHandler(tag,rq,tk):
+            failNum += 1
             logger.error(f'任务执行失败,任务为{tk}')
             tk.priority=1
             pq.put(tk)
         pq.task_done()
-
-
-def FeishuPushThread():
+    logger.error(f'爬虫线程{tag}退出{failNum}')
+    msgpq.put(Task(1, 'error', {'tag': tag,'msg': failNum}))
+def NewPostProducer():
     while True:
-        tk = msgpq.get()
-        if tk.task_type == 'summary':
-            dailyReportToOne(tk.data['openid'])
-        msgpq.task_done()
-
+        res = getLastPostFromES()
+        if res:
+            pq.put(Task(2, "newPost", {'from_id': res['_id'], 'from_time': res['_source']['p_time']}))
+        while not waitTimeManager.isSpiderOpen():
+            time.sleep(60)
+        time.sleep(waitTimeManager.getWaitTimeMin()*60)
 
 
 if __name__ == '__main__':

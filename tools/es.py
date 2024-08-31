@@ -9,7 +9,7 @@ my_index="school_new"
 response = es.search(
     index=my_index,
     body={
-        "size": 30,
+        "size": 2,
         "sort": [{"p_time": {"order": "desc"}}],
         "_source": ["_id"]
     }

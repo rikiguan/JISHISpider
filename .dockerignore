@@ -1,0 +1,41 @@
+# 忽略 Python 编译生成的文件
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# 忽略环境配置文件
+.env
+*.env
+
+# 忽略虚拟环境目录
+venv/
+env/
+.venv/
+
+# 忽略日志文件
+*.log
+
+# 忽略本地开发工具的配置文件
+*.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# 忽略测试结果
+.coverage
+*.coverage
+*.egg-info/
+dist/
+build/
+.coverage.*
+
+# 忽略 git 相关文件
+.git/
+.gitignore
+
+# 忽略 Dockerfile 本身和 .dockerignore
+Dockerfile
+.dockerignore
+
+
