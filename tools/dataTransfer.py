@@ -4,8 +4,8 @@ from elasticsearch import Elasticsearch
 from pymongo import MongoClient
 
 # 配置 Elasticsearch 和 MongoDB 的连接
-es = Elasticsearch("http://localhost:9200",timeout=600 )
-mongo_client = MongoClient("mongodb://mongoadmin:secret@localhost:27017/")
+es = Elasticsearch("http://192.168.19.128:9200",timeout=600 )
+mongo_client = MongoClient("mongodb://root:root@192.168.19.128:27017/")
 
 # 指定 Elasticsearch 的索引名称和 MongoDB 的数据库、集合名称
 es_index = "school_new"
@@ -33,7 +33,7 @@ def insert_document(title, content):
     # 先检查是否存在相同的 title 和 content
     existing_doc = mongo_collection.find_one({"nickname": title, "headimgurl": content})
     if existing_doc:
-        print(f"文档已存在，跳过插入: {existing_doc['_id']}")
+        print(f"DDTT文档已存在，跳过插入: {existing_doc['_id']}")
         return existing_doc['_id']
     else:
         user_id = generate_unique_user_id()
@@ -43,10 +43,10 @@ def insert_document(title, content):
             "headimgurl": content
         }
         mongo_collection.insert_one(document)
-        print(f"插入新文档: {document['_id']}")
+        print(f"DDTT插入新文档: {document['_id']}")
         return user_id
 
-def updateUser():
+def up1dateUser():
     # 使用scroll API从Elasticsearch中获取所有文档
     scroll_time = "2m"  # 设置 scroll 的时间
     es_results = es.search(index=es_index, body=query, scroll=scroll_time, size=1000)
@@ -73,7 +73,7 @@ def updateUser():
 
 
 
-    print("操作完成！")
+    print("DDTT操作完成！")
 
 
 # 从 Elasticsearch 中查询数据
@@ -213,7 +213,7 @@ while True:
             {"$set": document},
             upsert=True  # 如果文档不存在，则插入
         )
-        print(f"Inserted/Updated document with threadid: {source.get('thread_id')}")
+        print(f"DDTTInserted/Updated document with threadid: {source.get('thread_id')}")
 
     # 获取新的 scroll_id
     scroll_id = es_results['_scroll_id']

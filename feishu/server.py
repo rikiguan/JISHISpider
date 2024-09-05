@@ -50,8 +50,21 @@ def message_receive_event_handler(req_data: MessageReceiveEvent):
     open_id = sender_id.open_id
     text_content = message.content
     logger.info(f'从{open_id}收到数据{text_content}')
-    if(json.loads(text_content)['text'] == 'summary'):
+    text =json.loads(text_content)['text']
+    if(text == '总结'):
         msgpq.put(Task(2, 'summary', {'openid': open_id}))
+    if ("搜名字" in text):
+        content = text.split("搜名字", 1)[1].strip()
+        msgpq.put(Task(2, 'searchUserName', {'openid': open_id, 'content': content}))
+    if ("搜用户" in text):
+        content = text.split("搜用户", 1)[1].strip()
+        msgpq.put(Task(2, 'searchUserId', {'openid': open_id, 'content': content}))
+    if ("搜ID内容" in text):
+        content = text.split("搜ID内容", 1)[1].strip()
+        msgpq.put(Task(2, 'searchContentFromUserID', {'openid': open_id, 'content': content}))
+    if ("搜内容" in text):
+        content = text.split("搜内容", 1)[1].strip()
+        msgpq.put(Task(2, 'searchContent', {'openid': open_id, 'content': content}))
 
     return jsonify()
 

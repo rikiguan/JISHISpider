@@ -6,13 +6,14 @@ import JiShiRequest
 import utils.waitTimeManager
 from conf import *
 from tasks.feishuPushTask import FeishuPushThread
+from utils.databaseMG import getLastPostFromMG, getLastUpdateCommentFromMG
 from utils.useLog import log_thread
 import time
 from feishu import server
 from tasks import timingTask
 from utils.QueueModule import msgpq,pq
 from utils.TaskManager import Task, TaskManager
-from utils.databaseES import es, getLastPostFromES, addToDatabaseFromList
+# from utils.databaseES import es, getLastPostFromES, addToDatabaseFromList
 from utils.logger import logger
 
 import tasks #important
@@ -42,9 +43,18 @@ def SpiderThread(token):
     msgpq.put(Task(1, 'error', {'tag': tag,'msg': failNum}))
 def NewPostProducer():
     while True:
-        res = getLastPostFromES()
-        if res:
-            pq.put(Task(2, "newPost", {'from_id': res['_id'], 'from_time': res['_source']['p_time']}))
+        data = getLastPostFromMG()
+        if data:
+            pq.put(Task(2, "newPost", {'from_id': data.get('_id'), 'from_time': data.get('p_time')}))
+        while not waitTimeManager.isSpiderOpen():
+            time.sleep(60)
+        time.sleep(waitTimeManager.getWaitTimeMin()*60)
+def UpdateProducer():
+    while True:
+        data = getLastUpdateCommentFromMG()
+        if data:
+            pq.put(Task(3, "updateHistory", {'post_id': data.get('_id')}))
+            logger.info(f'更新{data.get('_id')}')
         while not waitTimeManager.isSpiderOpen():
             time.sleep(60)
         time.sleep(waitTimeManager.getWaitTimeMin()*60)
@@ -64,10 +74,14 @@ if __name__ == '__main__':
         Thread.append(t)
         t.start()
 
-#调度器
-    producertask = threading.Thread(target=NewPostProducer)
-    Thread.append(producertask)
-    producertask.start()
+#调度器1
+    producer1task = threading.Thread(target=NewPostProducer)
+    Thread.append(producer1task)
+    producer1task.start()
+#调度器2
+    producer2task = threading.Thread(target=UpdateProducer)
+    Thread.append(producer2task)
+    producer2task.start()
 
 #定时任务
     thread = threading.Thread(target=timingTask.schedule_daily_task, args=(22, 32))
@@ -75,7 +89,8 @@ if __name__ == '__main__':
 
     flask_thread.join()
     msg_thread.join()
-    producertask.join()
+    producer1task.join()
+    producer2task.join()
     for t in Thread:
         t.join()
 

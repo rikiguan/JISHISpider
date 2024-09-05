@@ -5,3 +5,4 @@ pycryptodome
 Requests
 requests_toolbelt
 Flask
+pymongo

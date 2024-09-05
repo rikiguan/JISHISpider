@@ -1,8 +1,9 @@
+from utils.databaseMG import getThreadCount, mongo_collection_thread
 from utils.logger import logger
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
-from utils.databaseES import es
+# from utils.databaseES import es
 import matplotlib.font_manager as fm
 
 # 字体文件路径
@@ -13,13 +14,12 @@ prop = fm.FontProperties(fname=font_path)
 
 # 设置 Matplotlib 使用自定义字体
 rcParams['font.family'] = prop.get_name()
-index_name = "school_new"
+
 
 
 def getAllDocNum():
-    response = es.count(index=index_name)
-    total_count = response['count']
-    logger.info(f"查询数据库索引 '{index_name}' 中的总数据量: {total_count}")
+    total_count = getThreadCount()
+    logger.info(f"查询数据库索引 thread中的总数据量: {total_count}")
     return total_count
 
 
@@ -27,23 +27,11 @@ def getDayDocNum():
     now = datetime.now()
     start_of_yesterday = now - timedelta(days=1)
     end_of_yesterday = now
-    # 构造查询，使用 count API 获取每小时的数据量
-    query = {
-        "query": {
-            "range": {
-                "p_time": {
-                    "gte": int(start_of_yesterday.timestamp()),  # 大于或等于该小时的开始时间
-                    "lt": int(end_of_yesterday.timestamp())  # 小于该小时的结束时间
-                }
-            }
-        }
-    }
-
-    # 调用 count API 获取记录数
-    response = es.count(index=index_name, body=query)  # 修改为你的索引名称
-    total_count = response['count']
-    logger.info(f"查询数据库今日索引 '{index_name}' 中的总数据量: {total_count}")
-    return total_count
+    today_records_count = mongo_collection_thread.count_documents({
+        "p_time": {"$gte": int(start_of_yesterday.timestamp()), "$lt": int(end_of_yesterday.timestamp())}
+    })
+    logger.info(f"查询数据库今日索引 thread 中的总数据量: {today_records_count}")
+    return today_records_count
 
 
 def genTimeCountImg():
@@ -56,20 +44,10 @@ def genTimeCountImg():
         # 计算每个小时的开始时间和结束时间
         start_hour = start_of_yesterday + timedelta(hours=hour)
         end_hour = start_hour + timedelta(hours=1)
-        # 构造查询，使用 count API 获取每小时的数据量
-        query = {
-            "query": {
-                "range": {
-                    "p_time": {
-                        "gte": int(start_hour.timestamp()),  # 大于或等于该小时的开始时间
-                        "lt": int(end_hour.timestamp())  # 小于该小时的结束时间
-                    }
-                }
-            }
-        }
-        # 调用 count API 获取记录数
-        response = es.count(index=index_name, body=query)  # 修改为你的索引名称
-        hourly_count[hour] = response['count']
+        today_records_count = mongo_collection_thread.count_documents({
+            "p_time": {"$gte": int(start_hour.timestamp()), "$lt": int(end_hour.timestamp())}
+        })
+        hourly_count[hour] = today_records_count
 
     hours = list(range(24))
     extra_info = list(range(start_of_yesterday.hour, 24)) + list(range(0, end_of_yesterday.hour))

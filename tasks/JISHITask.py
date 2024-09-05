@@ -4,9 +4,11 @@ import time
 import random
 
 from utils.TaskManager import TaskManager, Task
-from utils.databaseES import addToDatabaseFromList
+# from utils.databaseES import addToDatabaseFromList
 from utils.TaskManager import task_manager
 from utils.QueueModule import msgpq,pq
+from utils.databaseMG import addToDatabaseFromListMG, updateCupdatetime, updatePost
+
 
 def responseVerifyANDJSON(res):
     if res.status_code != 200:
@@ -34,7 +36,8 @@ def getNewPostNumTask(rq, tk, tag):
         return False
 
     list = data['data']['list']
-    addToDatabaseFromList(tag, list)
+
+    addToDatabaseFromListMG(list)
     returnnum = len(list)
     if (num == returnnum):
         return True
@@ -49,8 +52,34 @@ def getNewPostNumTask(rq, tk, tag):
         if data2['errno'] != 0 or len(data2['data']['list']) == 0:
             return False
         list2 = data2['data']['list']
-        addToDatabaseFromList(tag, list2)
+        addToDatabaseFromListMG(list2)
         timestamp = list2[-1]['p_time']
         returnnum += len(list2)
         time.sleep(random.uniform(5,10))
+    return True
+
+
+
+@task_manager.register('updateHistory')
+def updateHistoryTask(rq, tk, tag):
+    res = rq.requestPostInfo(tk.data['post_id'])
+    data = responseVerifyANDJSON(res)
+    if not data:
+        return False
+    if not data['data']['is_show']:
+        updateCupdatetime(tk.data['post_id'],int(time.time()))
+        logger.error(f"{tk.data['post_id']}无法访问")
+        return True
+    time.sleep(random.uniform(1, 2))
+    res1 = rq.requestPostComment(tk.data['post_id'], data['data']['detail']['sign'])
+    data1 = responseVerifyANDJSON(res1)
+    if not data1:
+        return False
+
+    doc = data['data']['detail']
+
+    commentList = data1['data']['list']
+    updatePost(tk.data['post_id'],doc,commentList)
+    updateCupdatetime(tk.data['post_id'],int(time.time()))
+    time.sleep(random.uniform(5, 10))
     return True

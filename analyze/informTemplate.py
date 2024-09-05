@@ -16,4 +16,6 @@ def daySummaryTemplate(open_id, allPost, dayPost, img, Workerlist, APIlist):
     message_api_client.send_interactiveTemplate_with_open_id(open_id, 'AAqCRc3c33RB6', data)
 
 def informText(open_id, msg):
-    message_api_client.send_text_with_open_id(open_id,msg )
+    if not msg:
+        msg = '空'
+    message_api_client.send_text_with_open_id(open_id,msg)
