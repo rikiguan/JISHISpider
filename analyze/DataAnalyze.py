@@ -1,4 +1,4 @@
-from utils.databaseMG import getThreadCount, mongo_collection_thread
+from utils.databaseMG import getThreadCount, mongo_collection_thread, getUserCount
 from utils.logger import logger
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
@@ -16,7 +16,10 @@ prop = fm.FontProperties(fname=font_path)
 rcParams['font.family'] = prop.get_name()
 
 
-
+def getAllUser():
+    total_count = getUserCount()
+    logger.info(f"查询数据库索引user中的总数据量: {total_count}")
+    return total_count
 def getAllDocNum():
     total_count = getThreadCount()
     logger.info(f"查询数据库索引 thread中的总数据量: {total_count}")

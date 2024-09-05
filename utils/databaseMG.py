@@ -4,9 +4,9 @@ import time
 from utils.logger import logger, printlog, genTextColor
 # from elasticsearch import Elasticsearch
 from pymongo import MongoClient
-
+from conf import *
 # 配置 Elasticsearch 和 MongoDB 的连接
-mongo_client = MongoClient("mongodb://root:root@192.168.19.128:27017/")
+mongo_client = MongoClient(MG)
 
 mongo_db = mongo_client["schoolNJU"]
 mongo_collection_user = mongo_db["user"]
