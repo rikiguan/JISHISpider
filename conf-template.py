@@ -18,3 +18,5 @@ Tokens = [('',
 
 
 informid=['']
+
+MG = "mongodb://root:root@my-mg:27017/"

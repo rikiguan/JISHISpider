@@ -5,6 +5,7 @@ from utils.logger import logger, printlog, genTextColor
 # from elasticsearch import Elasticsearch
 from pymongo import MongoClient
 from conf import *
+
 # 配置 Elasticsearch 和 MongoDB 的连接
 mongo_client = MongoClient(MG)
 
@@ -12,12 +13,17 @@ mongo_db = mongo_client["schoolNJU"]
 mongo_collection_user = mongo_db["user"]
 mongo_collection_thread = mongo_db["thread"]
 
+
 def getThreadCount():
     total_documents = mongo_collection_thread.count_documents({})
     return total_documents
+
+
 def getUserCount():
     total_documents = mongo_collection_user.count_documents({})
     return total_documents
+
+
 # 生成不重复的六位字母和数字组合的 user_id
 def generate_unique_user_id():
     while True:
@@ -190,7 +196,6 @@ def updateUserFromID(user_id, new_username, new_imgurl):
         return user_id
 
 
-
 def addToDatabaseMG(doc):
     source = doc
     document = {
@@ -260,11 +265,12 @@ def getLastPostFromMG():
 
 
 def getLastUpdateCommentFromMG():
-    one_month_ago=int(time.time())-2000000
+    one_month_ago = int(time.time()) - 2000000 # 一月前
     one_day_ago = int(time.time()) - 86400  # 一天前
 
     max_score_document = mongo_collection_thread.find(
-        {"p_time": {"$gte": one_month_ago, "$lte": one_day_ago}}
+        {"p_time": {"$gte": one_month_ago},
+         "cupdatetime": {"$lte": one_day_ago}}
     ).sort("cupdatetime", 1).limit(1)
 
     max_score_document_list = list(max_score_document)
@@ -277,19 +283,18 @@ def getLastUpdateCommentFromMG():
 
 def updatePost(postid, postdoc, commentsdoc):
     data = getThread(postid)
-    commentsArray= dict()
+    commentsArray = dict()
     for comment in data["comment_list"]:
         commentsArray[comment.get("comment_id")] = comment
         if "reply_list" in comment:
             for re in comment["reply_list"]:
                 commentsArray[re.get("comment_id")] = re
 
-
     source = postdoc
     document = {
         "title": source.get("title"),
         "content": source.get("content"),
-        "userid": updateUserFromID(data.get("userid"),source.get("nickname"), source.get("headimgurl")),
+        "userid": updateUserFromID(data.get("userid"), source.get("nickname"), source.get("headimgurl")),
         "cupdatetime": 0,
         "c_count": int(source.get("view_count")),
         "like_num": int(source.get("like_num")),
@@ -310,7 +315,7 @@ def updatePost(postid, postdoc, commentsdoc):
     for comment in comments:
         Ocomment = commentsArray.get(comment.get("comment_id"))
         if Ocomment:
-            userid = updateUserFromID(Ocomment.get("userid"),comment.get("nickname"),comment.get("headimgurl"))
+            userid = updateUserFromID(Ocomment.get("userid"), comment.get("nickname"), comment.get("headimgurl"))
         else:
             userid = get_user(comment.get("nickname"), comment.get("headimgurl"))
 
