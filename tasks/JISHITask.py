@@ -3,7 +3,7 @@ import time
 
 import random
 
-from utils import logger
+from utils.logger import logger
 from utils.TaskManager import TaskManager, Task
 # from utils.databaseES import addToDatabaseFromList
 from utils.TaskManager import task_manager
