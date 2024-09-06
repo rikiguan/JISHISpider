@@ -261,10 +261,12 @@ def getLastPostFromMG():
 
 def getLastUpdateCommentFromMG():
     one_month_ago=int(time.time())-2000000
+    one_day_ago = int(time.time()) - 86400  # 一天前
+
     max_score_document = mongo_collection_thread.find(
-        {"p_time": {"$gte": one_month_ago}}
+        {"p_time": {"$gte": one_month_ago, "$lte": one_day_ago}}
     ).sort("cupdatetime", 1).limit(1)
-    # max_score_document = mongo_collection_thread.find().sort("cupdatetime", 1).limit(1)
+
     max_score_document_list = list(max_score_document)
     if max_score_document_list:
         max_document = max_score_document_list[0]
