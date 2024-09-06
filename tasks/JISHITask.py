@@ -3,6 +3,7 @@ import time
 
 import random
 
+from utils import logger
 from utils.TaskManager import TaskManager, Task
 # from utils.databaseES import addToDatabaseFromList
 from utils.TaskManager import task_manager
@@ -63,8 +64,10 @@ def getNewPostNumTask(rq, tk, tag):
 @task_manager.register('updateHistory')
 def updateHistoryTask(rq, tk, tag):
     res = rq.requestPostInfo(tk.data['post_id'])
+    logger.info(res)
     data = responseVerifyANDJSON(res)
     if not data:
+        logger.error(f"{tk.data['post_id']}第一解析失败无法访问")
         return False
     if not data['data']['is_show']:
         updateCupdatetime(tk.data['post_id'],int(time.time()))
@@ -72,8 +75,10 @@ def updateHistoryTask(rq, tk, tag):
         return True
     time.sleep(random.uniform(1, 2))
     res1 = rq.requestPostComment(tk.data['post_id'], data['data']['detail']['sign'])
+    logger.info(res1)
     data1 = responseVerifyANDJSON(res1)
     if not data1:
+        logger.error(f"{tk.data['post_id']}第二解析失败无法访问")
         return False
 
     doc = data['data']['detail']
