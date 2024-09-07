@@ -134,9 +134,14 @@ def addToDatabaseFromListMG(list):
 
 
 def updateUserFromID(user_id, new_username, new_imgurl):
+    if new_username == "***":
+        logger.info(f"***跳过更新更新用户{user_id}")
+        return user_id
+
     existing_doc = mongo_collection_user.find_one({"nickname": new_username, "headimgurl": new_imgurl})
+
     # 匹配到同一用户
-    if existing_doc and (not existing_doc.get("_id") == user_id) and (not new_username == "***"):
+    if existing_doc and (not existing_doc.get("_id") == user_id) :
 
         matching_docs = mongo_collection_thread.find({
             "$or": [
