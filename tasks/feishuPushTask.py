@@ -4,6 +4,7 @@ from utils.QueueModule import msgpq
 from conf import *
 from utils.TaskManager import task_manager
 from utils.databaseMG import searchUserName, searchUserThreadFromId, getUser, searchThread
+from utils.logger import logger
 
 
 def FeishuPushThread():
@@ -47,3 +48,7 @@ def errorTask(tk):
         tag = tk.data['tag']
         message = tk.data['msg']
         informText(openid, f'错误信息提示{tag}:{message}')
+@task_manager.register('subscript')
+def subscriptTask(tk):
+    informid.append(tk.data['openid'])
+    logger.info(informid)

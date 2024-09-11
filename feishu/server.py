@@ -65,6 +65,9 @@ def message_receive_event_handler(req_data: MessageReceiveEvent):
     if ("搜内容" in text):
         content = text.split("搜内容", 1)[1].strip()
         msgpq.put(Task(2, 'searchContent', {'openid': open_id, 'content': content}))
+    if ("订阅" in text):
+        content=''
+        msgpq.put(Task(2, 'subscript', {'openid': open_id, 'content': content}))
 
     return jsonify()
 
