@@ -52,3 +52,7 @@ def errorTask(tk):
 def subscriptTask(tk):
     informid.append(tk.data['openid'])
     logger.info(informid)
+@task_manager.register('delsubscript')
+def delsubscriptTask(tk):
+    informid.clear()
+    logger.info('清空订阅')

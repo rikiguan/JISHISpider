@@ -68,6 +68,9 @@ def message_receive_event_handler(req_data: MessageReceiveEvent):
     if ("订阅" in text):
         content=''
         msgpq.put(Task(2, 'subscript', {'openid': open_id, 'content': content}))
+    if ("清除" in text):
+        content=''
+        msgpq.put(Task(2, 'delsubscript', {'openid': open_id, 'content': content}))
 
     return jsonify()
 
