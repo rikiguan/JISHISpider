@@ -57,7 +57,7 @@ def UpdateProducer():
             logger.info(f'更新{data.get('_id')}')
         while not waitTimeManager.isSpiderOpen():
             time.sleep(60)
-        time.sleep(waitTimeManager.getWaitTimeMin()*2)
+        time.sleep(waitTimeManager.getWaitTimeMin()*5)
 
 
 if __name__ == '__main__':
